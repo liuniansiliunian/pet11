@@ -1,0 +1,319 @@
+<!-- src/main/resources/static/backstage/medicine-list.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>药品管理</title>
+    <link rel="stylesheet" href="../assets/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>药品管理</h2>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMedicineModal">添加药品</button>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="searchInput" placeholder="搜索药品...">
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>药品名称</th>
+            <th>价格</th>
+            <th>库存</th>
+            <th>生产厂家</th>
+            <th>过期日期</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="medicineTableBody">
+        <!-- 数据将通过JavaScript动态加载 -->
+        </tbody>
+    </table>
+</div>
+
+<!-- 添加药品模态框 -->
+<div class="modal fade" id="addMedicineModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加药品</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addMedicineForm">
+                    <div class="mb-3">
+                        <label for="medicineName" class="form-label">药品名称</label>
+                        <input type="text" class="form-control" id="medicineName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="medicinePrice" class="form-label">价格</label>
+                        <input type="number" class="form-control" id="medicinePrice" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="medicineStock" class="form-label">库存</label>
+                        <input type="number" class="form-control" id="medicineStock" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="medicineManufacturer" class="form-label">生产厂家</label>
+                        <input type="text" class="form-control" id="medicineManufacturer">
+                    </div>
+                    <div class="mb-3">
+                        <label for="medicineExpireDate" class="form-label">过期日期</label>
+                        <input type="date" class="form-control" id="medicineExpireDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="medicineDescription" class="form-label">描述</label>
+                        <textarea class="form-control" id="medicineDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveMedicineBtn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑药品模态框 -->
+<div class="modal fade" id="editMedicineModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">编辑药品</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editMedicineForm">
+                    <input type="hidden" id="editMedicineId">
+                    <div class="mb-3">
+                        <label for="editMedicineName" class="form-label">药品名称</label>
+                        <input type="text" class="form-control" id="editMedicineName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editMedicinePrice" class="form-label">价格</label>
+                        <input type="number" class="form-control" id="editMedicinePrice" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editMedicineStock" class="form-label">库存</label>
+                        <input type="number" class="form-control" id="editMedicineStock" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editMedicineManufacturer" class="form-label">生产厂家</label>
+                        <input type="text" class="form-control" id="editMedicineManufacturer">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editMedicineExpireDate" class="form-label">过期日期</label>
+                        <input type="date" class="form-control" id="editMedicineExpireDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editMedicineDescription" class="form-label">描述</label>
+                        <textarea class="form-control" id="editMedicineDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="updateMedicineBtn">更新</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/bootstrap.bundle.min.js"></script>
+<script src="../js/request.js"></script>
+<script>
+    // 页面加载时获取药品列表
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMedicineList();
+
+        // 保存药品按钮事件
+        document.getElementById('saveMedicineBtn').addEventListener('click', function() {
+            saveMedicine();
+        });
+
+        // 更新药品按钮事件
+        document.getElementById('updateMedicineBtn').addEventListener('click', function() {
+            updateMedicine();
+        });
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function() {
+            searchMedicine(this.value);
+        });
+    });
+
+    // 加载药品列表
+    function loadMedicineList() {
+        request.get('/medicine/list')
+            .then(response => {
+                if (response.code === 1) {  // 修复：根据Result类的code判断
+                    renderMedicineTable(response);  // 修复：直接传入response
+                } else {
+                    alert('获取药品列表失败: ' + response.msg);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('获取药品列表出错');
+            });
+    }
+
+    // 渲染药品表格
+    function renderMedicineTable(medicines) {
+        const tbody = document.getElementById('medicineTableBody');
+        tbody.innerHTML = '';
+
+        // 修复：根据Result结构获取数据
+        medicines.forEach(medicine => {
+            const row = `
+                <tr>
+                    <td>${medicine.id}</td>
+                    <td>${medicine.name}</td>
+                    <td>¥${medicine.price}</td>
+                    <td>${medicine.stock}</td>
+                    <td>${medicine.manufacturer || ''}</td>
+                    <td>${medicine.expireDate || ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editMedicine(${medicine.id})">编辑</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteMedicine(${medicine.id})">删除</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // 保存药品
+    function saveMedicine() {
+        const medicine = {
+            name: document.getElementById('medicineName').value,
+            price: parseFloat(document.getElementById('medicinePrice').value),
+            stock: parseInt(document.getElementById('medicineStock').value),
+            manufacturer: document.getElementById('medicineManufacturer').value,
+            expireDate: document.getElementById('medicineExpireDate').value,
+            description: document.getElementById('medicineDescription').value,
+            createTime: new Date()  // 添加创建时间
+        };
+
+        request.post('/medicine/add', medicine)
+            .then(response => {
+                if (response.code === 1) {  // 修复：根据Result类的code判断
+                    alert('药品添加成功');
+                    document.getElementById('addMedicineForm').reset();
+                    bootstrap.Modal.getInstance(document.getElementById('addMedicineModal')).hide();
+                    loadMedicineList();
+                } else {
+                    alert('药品添加失败: ' + response.msg);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('药品添加出错');
+            });
+    }
+
+    // 搜索药品
+    function searchMedicine(keyword) {
+        if (keyword.trim() === '') {
+            loadMedicineList();
+            return;
+        }
+
+        request.get(`/medicine/search?keyword=${keyword}`)
+            .then(response => {
+                if (response.code === 1) {  // 修复：根据Result类的code判断
+                    renderMedicineTable(response);  // 修复：直接传入response
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('搜索药品出错');
+            });
+    }
+
+    // 编辑药品
+    function editMedicine(id) {
+        // 获取所有药品数据，找到要编辑的药品
+        request.get('/medicine/list')
+            .then(response => {
+                if (response.code === 1) {
+                    const medicine = response.find(m => m.id === id);
+                    if (medicine) {
+                        // 填充编辑表单
+                        document.getElementById('editMedicineId').value = medicine.id;
+                        document.getElementById('editMedicineName').value = medicine.name;
+                        document.getElementById('editMedicinePrice').value = medicine.price;
+                        document.getElementById('editMedicineStock').value = medicine.stock;
+                        document.getElementById('editMedicineManufacturer').value = medicine.manufacturer || '';
+                        document.getElementById('editMedicineExpireDate').value = medicine.expireDate || '';
+                        document.getElementById('editMedicineDescription').value = medicine.description || '';
+
+                        // 显示编辑模态框
+                        const modal = new bootstrap.Modal(document.getElementById('editMedicineModal'));
+                        modal.show();
+                    }
+                } else {
+                    alert('获取药品信息失败: ' + response.msg);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('获取药品信息出错');
+            });
+    }
+
+    // 更新药品
+    function updateMedicine() {
+        const medicine = {
+            id: parseInt(document.getElementById('editMedicineId').value),
+            name: document.getElementById('editMedicineName').value,
+            price: parseFloat(document.getElementById('editMedicinePrice').value),
+            stock: parseInt(document.getElementById('editMedicineStock').value),
+            manufacturer: document.getElementById('editMedicineManufacturer').value,
+            expireDate: document.getElementById('editMedicineExpireDate').value,
+            description: document.getElementById('editMedicineDescription').value
+        };
+
+        request.put('/medicine/update', medicine)
+            .then(response => {
+                if (response.code === 1) {  // 修复：根据Result类的code判断
+                    alert('药品更新成功');
+                    bootstrap.Modal.getInstance(document.getElementById('editMedicineModal')).hide();
+                    loadMedicineList();
+                } else {
+                    alert('药品更新失败: ' + response.msg);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('药品更新出错');
+            });
+    }
+
+    // 删除药品
+    function deleteMedicine(id) {
+        if (confirm('确定要删除这个药品吗？')) {
+            request.delete(`/medicine/delete/${id}`)
+                .then(response => {
+                    if (response.code === 1) {  // 修复：根据Result类的code判断
+                        alert('药品删除成功');
+                        loadMedicineList();
+                    } else {
+                        alert('药品删除失败: ' + response.msg);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('药品删除出错');
+                });
+        }
+    }
+</script>
+</body>
+</html>
