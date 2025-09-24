@@ -1,7 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- src/main/resources/com/forge/mapper/MedicineSaleMapper.xml -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.forge.mapper.MedicineSaleMapper">
 
+    <!-- 结果映射 -->
+    <resultMap id="medicineSaleResultMap" type="com.forge.entity.MedicineSale">
+        <id property="id" column="id"/>
+        <result property="medicineId" column="medicine_id"/>
+        <result property="medicineName" column="medicine_name"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="totalPrice" column="total_price"/>
+        <result property="clientId" column="client_id"/>
+        <result property="employeeId" column="employee_id"/>
+        <result property="saleTime" column="sale_time"/>
+    </resultMap>
+
+    <!-- 查询所有销售记录 -->
+    <select id="findAll" resultMap="medicineSaleResultMap">
+        SELECT * FROM medicine_sale ORDER BY sale_time DESC
+    </select>
+
+    <!-- 根据客户ID查询销售记录 -->
+    <select id="findByClientId" parameterType="long" resultMap="medicineSaleResultMap">
+        SELECT * FROM medicine_sale WHERE client_id = #{clientId} ORDER BY sale_time DESC
+    </select>
+
+    <!-- 插入销售记录 -->
+    <insert id="insert" parameterType="com.forge.entity.MedicineSale" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO medicine_sale(medicine_id, medicine_name, quantity, unit_price, total_price, client_id, employee_id, sale_time)
+        VALUES(#{medicineId}, #{medicineName}, #{quantity}, #{unitPrice}, #{totalPrice}, #{clientId}, #{employeeId}, #{saleTime})
+    </insert>
+
+    <!-- 根据日期范围查询销售记录 -->
+    <select id="findByDateRange" resultMap="medicineSaleResultMap">
+        SELECT * FROM medicine_sale
+        WHERE sale_time BETWEEN #{startDate} AND #{endDate}
+        ORDER BY sale_time DESC
+    </select>
 </mapper>

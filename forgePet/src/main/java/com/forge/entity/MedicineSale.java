@@ -1,4 +1,3 @@
-// src/main/java/com/forge/entity/MedicineSale.java
 package com.forge.entity;
 
 import java.util.Date;

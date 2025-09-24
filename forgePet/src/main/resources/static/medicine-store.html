@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>药品商城 - 宠物医院</title>
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+    <style>
+        .medicine-card {
+            transition: transform 0.2s;
+        }
+        .medicine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <header class="d-flex justify-content-between align-items-center mb-4">
+        <h2>在线药品商城</h2>
+        <a href="index.html" class="btn btn-outline-primary">返回首页</a>
+    </header>
+
+    <div class="row" id="medicineListContainer">
+    </div>
+</div>
+
+<div class="modal fade" id="buyMedicineModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="buyModalTitle">购买药品</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="buyMedicineForm">
+                    <input type="hidden" id="buyMedicineId">
+                    <p><strong>药品名称:</strong> <span id="buyMedicineName"></span></p>
+                    <p><strong>单价:</strong> ¥<span id="buyMedicinePrice"></span></p>
+                    <div class="mb-3">
+                        <label for="buyQuantity" class="form-label">购买数量</label>
+                        <input type="number" class="form-control" id="buyQuantity" value="1" min="1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="confirmPurchaseBtn">确认购买</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="assets/bootstrap.bundle.min.js"></script>
+<script src="js/request.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMedicines();
+
+        document.getElementById('confirmPurchaseBtn').addEventListener('click', confirmPurchase);
+    });
+
+    // 加载所有药品
+    function loadMedicines() {
+        const container = document.getElementById('medicineListContainer');
+        request.get('/medicine/list')
+            .then(response => {
+                if (response.code === 1 && response.data) {
+                    if(response.data.length === 0) {
+                        container.innerHTML = '<p class="text-center">暂无可售药品。</p>';
+                        return;
+                    }
+
+                    let html = '';
+                    response.data.forEach(med => {
+                        // 只显示有库存的药品
+                        if (med.stock > 0) {
+                            html += `
+                                <div class="col-md-4 mb-4">
+                                    <div class="card medicine-card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${med.name}</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">¥${med.price.toFixed(2)}</h6>
+                                            <p class="card-text">${med.description || '暂无描述'}</p>
+                                            <p class="card-text"><small class="text-muted">剩余库存: ${med.stock}</small></p>
+                                        </div>
+                                        <div class="card-footer bg-transparent border-0">
+                                             <button class="btn btn-primary w-100" onclick="openBuyModal(${med.id}, '${med.name}', ${med.price}, ${med.stock})">
+                                                立即购买
+                                             </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p class="text-center text-danger">加载药品失败。</p>';
+                }
+            })
+            .catch(error => {
+                console.error("加载药品列表失败:", error);
+                container.innerHTML = '<p class="text-center text-danger">加载药品失败，请检查网络连接。</p>';
+            });
+    }
+
+    // 打开购买模态框并填充数据
+    function openBuyModal(id, name, price, maxStock) {
+        // 检查用户是否登录
+        const clientInfo = sessionStorage.getItem('client');
+        if (!clientInfo) {
+            alert('请先登录再进行购买！');
+            window.location.href = 'login.html'; // 跳转到登录页
+            return;
+        }
+
+        document.getElementById('buyMedicineId').value = id;
+        document.getElementById('buyMedicineName').innerText = name;
+        document.getElementById('buyMedicinePrice').innerText = price.toFixed(2);
+
+        const quantityInput = document.getElementById('buyQuantity');
+        quantityInput.value = 1; // 重置数量为1
+        quantityInput.max = maxStock; // 设置最大可购买数量为库存
+
+        const modal = new bootstrap.Modal(document.getElementById('buyMedicineModal'));
+        modal.show();
+    }
+
+    // 确认购买
+    function confirmPurchase() {
+        const clientInfoStr = sessionStorage.getItem('client');
+        if (!clientInfoStr) {
+            alert('登录状态已失效，请重新登录。');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const client = JSON.parse(clientInfoStr);
+        const clientId = client.clientId;
+
+        const saleDto = {
+            medicineId: parseInt(document.getElementById('buyMedicineId').value),
+            quantity: parseInt(document.getElementById('buyQuantity').value),
+            clientId: clientId,
+            employeeId: null // 用户自主购买，没有员工ID，后端会自动处理或忽略
+        };
+
+        // 前端简单验证
+        if (saleDto.quantity <= 0) {
+            alert('购买数量必须大于0！');
+            return;
+        }
+
+        request.post('/medicine-sale/sell', saleDto)
+            .then(response => {
+                if (response.code === 1) {
+                    alert('购买成功！');
+                    const modalEl = document.getElementById('buyMedicineModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) {
+                        modal.hide();
+                    }
+                    loadMedicines(); // 重新加载列表以更新库存
+                } else {
+                    alert('购买失败: ' + (response.msg || '库存不足或发生未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error("购买失败:", error);
+                alert('购买请求失败，请稍后再试。');
+            });
+    }
+</script>
+
+</body>
+</html>

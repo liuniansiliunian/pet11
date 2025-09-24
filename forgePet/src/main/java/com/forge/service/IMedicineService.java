@@ -1,4 +1,3 @@
-// src/main/java/com/forge/service/IMedicineService.java
 package com.forge.service;
 
 import com.forge.entity.Medicine;

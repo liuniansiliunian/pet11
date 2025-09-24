@@ -23,13 +23,12 @@ public record Result(Integer code, String msg, Object data) {
         return new Result(1, msg);
     }
 
-    // 修正后的success方法
-    public static Result success(String message, Object data) {
-        return new Result(200, message, data);
+    // 添加支持数据的成功响应方法
+    public static Result success(Object data) {
+        return new Result(1, "操作成功", data);
     }
 
-    // 如果需要默认成功状态码的重载方法
-    public static Result success(Object data) {
-        return new Result(200, "操作成功", data);
+    public static Result success(String msg, Object data) {
+        return new Result(1, msg, data);
     }
 }

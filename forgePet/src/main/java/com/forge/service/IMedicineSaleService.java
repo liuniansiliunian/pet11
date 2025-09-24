@@ -1,4 +1,3 @@
-// src/main/java/com/forge/service/IMedicineSaleService.java
 package com.forge.service;
 
 import com.forge.dto.MedicineSaleDto;

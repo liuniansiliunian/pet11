@@ -1,4 +1,3 @@
-// src/main/java/com/forge/dto/MedicineSaleDto.java
 package com.forge.dto;
 
 public class MedicineSaleDto {

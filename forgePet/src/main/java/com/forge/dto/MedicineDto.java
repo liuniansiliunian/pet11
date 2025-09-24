@@ -1,4 +1,3 @@
-// src/main/java/com/forge/dto/MedicineDto.java
 package com.forge.dto;
 
 import java.util.Date;

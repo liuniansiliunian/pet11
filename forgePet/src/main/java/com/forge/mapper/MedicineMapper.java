@@ -1,4 +1,3 @@
-// src/main/java/com/forge/mapper/MedicineMapper.java
 package com.forge.mapper;
 
 import com.forge.entity.Medicine;

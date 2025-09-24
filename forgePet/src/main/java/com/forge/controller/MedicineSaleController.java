@@ -22,19 +22,19 @@ public class MedicineSaleController {
         if (result) {
             return Result.success("药品销售成功");
         } else {
-            return Result.success("药品销售失败，库存不足");
+            return Result.error("药品销售失败，库存不足");
         }
     }
 
     @GetMapping("/list")
     public Result list() {
         List<MedicineSale> sales = medicineSaleService.getAllSales();
-        return Result.success("获取销售记录成功", sales);
+        return Result.success(sales); // 使用新的success方法返回数据
     }
 
     @GetMapping("/client/{clientId}")
     public Result getByClient(@PathVariable Long clientId) {
         List<MedicineSale> sales = medicineSaleService.getSalesByClientId(clientId);
-        return Result.success("获取客户销售记录成功", sales);
+        return Result.success(sales); // 使用新的success方法返回数据
     }
 }

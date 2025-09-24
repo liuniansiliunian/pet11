@@ -195,39 +195,51 @@
         <p class="lead text-center mb-5 user-select-none" id="needLoginText">
             点击登录
         </p>
-        <div class="row g-4">
-            <div class="col-md">
-                <div class="card border border-primary border-3">
-                    <div class="card-body text-center">
-                        <div class="card-title">挂号信息</div>
-                        <div class="card-text">
-                            点击这里可以查看自己的挂号信息，以及某位医生的挂号占用情况
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+            <div class="col">
+                <div class="card border border-primary border-3 h-100">
+                    <div class="card-body text-center d-flex flex-column">
+                        <div class="card-title h5">挂号信息</div>
+                        <div class="card-text flex-grow-1">
+                            点击这里可以查看自己的挂号信息，以及某位医生的挂号占用情况。
                         </div>
-                        <a href="reception/oneClient.html?appoint" class="btn btn-primary mt-2">自己的挂号</a>
-                        <a href="reception/doctorSee.html" class="btn btn-primary mt-2">医生的挂号</a>
+                        <a href="reception/oneClient.html?appoint" class="btn btn-primary mt-3">我的挂号</a>
+                        <a href="reception/doctorSee.html" class="btn btn-outline-primary mt-2">医生排班</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md">
-                <div class="card border border-info border-3">
-                    <div class="card-body text-center">
-                        <div class="card-title">宠物信息</div>
-                        <div class="card-text">
+            <div class="col">
+                <div class="card border border-info border-3 h-100">
+                    <div class="card-body text-center d-flex flex-column">
+                        <div class="card-title h5">宠物信息</div>
+                        <div class="card-text flex-grow-1">
                             查看一些宠物最新的信息和最近的相关动态。
                         </div>
-                        <a href="reception/oneClient.html?pet" class="btn btn-info mt-2">宠物详情</a>
+                        <a href="reception/oneClient.html?pet" class="btn btn-info mt-3">我的宠物</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md">
-                <div class="card border border-warning border-3">
-                    <div class="card-body text-center">
-                        <div class="card-title">领养寄养管理</div>
-                        <div class="card-text">
+
+            <div class="col">
+                <div class="card border border-success border-3 h-100">
+                    <div class="card-body text-center d-flex flex-column">
+                        <div class="card-title h5">在线购药</div>
+                        <div class="card-text flex-grow-1">
+                            为您的爱宠选购常备药品和营养品，在线下单，方便快捷。
+                        </div>
+                        <a href="medicine-store.html" class="btn btn-success mt-3">前往商城</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border border-warning border-3 h-100">
+                    <div class="card-body text-center d-flex flex-column">
+                        <div class="card-title h5">领养与寄养</div>
+                        <div class="card-text flex-grow-1">
                             查看可被领养的宠物的信息以及查看被寄养的宠物信息。
                         </div>
-                        <a href="reception/petSee.html" class="btn btn-warning mt-2">领养详情</a>
-                        <a href="reception/petFoster.html" class="btn btn-warning mt-2">寄养详情</a>
+                        <a href="reception/petSee.html" class="btn btn-warning mt-3">领养中心</a>
+                        <a href="reception/petFoster.html" class="btn btn-outline-warning mt-2">寄养服务</a>
                     </div>
                 </div>
             </div>

@@ -1,7 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- src/main/resources/com/forge/mapper/MedicineMapper.xml -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.forge.mapper.MedicineMapper">
 
+    <!-- 结果映射 -->
+    <resultMap id="medicineResultMap" type="com.forge.entity.Medicine">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="stock" column="stock"/>
+        <result property="manufacturer" column="manufacturer"/>
+        <result property="expireDate" column="expire_date"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!-- 查询所有药品 -->
+    <select id="findAll" resultMap="medicineResultMap">
+        SELECT * FROM medicine ORDER BY id DESC
+    </select>
+
+    <!-- 根据ID查询药品 -->
+    <select id="findById" parameterType="long" resultMap="medicineResultMap">
+        SELECT * FROM medicine WHERE id = #{id}
+    </select>
+
+    <!-- 插入药品 -->
+    <insert id="insert" parameterType="com.forge.entity.Medicine" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO medicine(name, description, price, stock, manufacturer, expire_date, create_time)
+        VALUES(#{name}, #{description}, #{price}, #{stock}, #{manufacturer}, #{expireDate}, #{createTime})
+    </insert>
+
+    <!-- 更新药品 -->
+    <update id="update" parameterType="com.forge.entity.Medicine">
+        UPDATE medicine
+        SET name = #{name},
+            description = #{description},
+            price = #{price},
+            stock = #{stock},
+            manufacturer = #{manufacturer},
+            expire_date = #{expireDate}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除药品 -->
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM medicine WHERE id = #{id}
+    </delete>
+
+    <!-- 根据名称搜索药品 -->
+    <select id="findByNameContaining" parameterType="string" resultMap="medicineResultMap">
+        SELECT * FROM medicine
+        WHERE name LIKE CONCAT('%', #{name}, '%')
+        ORDER BY id DESC
+    </select>
 </mapper>
